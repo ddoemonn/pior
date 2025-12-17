@@ -83,8 +83,13 @@ fn get_syntax_for_file(path: &Path) -> Syntax {
             decorators: true,
             ..Default::default()
         }),
+        "js" | "mjs" | "cjs" => Syntax::Es(EsSyntax {
+            jsx: true,
+            decorators: true,
+            ..Default::default()
+        }),
         _ => Syntax::Es(EsSyntax {
-            jsx: false,
+            jsx: true,
             decorators: true,
             ..Default::default()
         }),

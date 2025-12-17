@@ -53,17 +53,26 @@ pior --workspace pkg-name # analyze single workspace
 
 ## Benchmark
 
-Tested on [TanStack/query](https://github.com/TanStack/query) (835 files):
+Tested on [TanStack/query](https://github.com/TanStack/query) (908 files):
 
-| Tool | Mean | Min | Max |
-|:---|---:|---:|---:|
-| pior | 65.1 ms | 64.6 ms | 65.5 ms |
-| knip | 1568 ms | 1528 ms | 1689 ms |
+| Tool | Time |
+|:---|---:|
+| pior | 117 ms |
+| knip | 3.5 s |
 
-**~24x faster**
+**~30x faster**
+
+Single package (@tanstack/query-core, 52 files):
+
+| Tool | Time |
+|:---|---:|
+| pior | 9.4 ms |
+| knip | 473 ms |
+
+**~50x faster**
 
 Run your own:
 
 ```bash
-hyperfine --warmup 2 'pior .' 'bunx knip'
+hyperfine --warmup 2 -i 'pior' 'bunx knip'
 ```

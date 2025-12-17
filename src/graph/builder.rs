@@ -24,7 +24,13 @@ pub struct Module {
     pub path: PathBuf,
     pub imports: Vec<ResolvedImport>,
     pub exports: Vec<Export>,
-    pub re_exports: Vec<ReExport>,
+    pub re_exports: Vec<ResolvedReExport>,
+}
+
+#[derive(Debug)]
+pub struct ResolvedReExport {
+    pub original: ReExport,
+    pub resolved_path: Option<PathBuf>,
 }
 
 #[derive(Debug)]
@@ -137,13 +143,22 @@ pub fn build_graph_with_options(config: &ResolvedConfig, options: BuildOptions) 
             });
         }
 
+        let mut resolved_re_exports = Vec::new();
+        for re_export in parsed.re_exports {
+            let resolved_path = resolver.resolve(&re_export.specifier, &path);
+            resolved_re_exports.push(ResolvedReExport {
+                original: re_export,
+                resolved_path,
+            });
+        }
+
         modules.insert(
             path.clone(),
             Module {
                 path,
                 imports: resolved_imports,
                 exports: parsed.exports,
-                re_exports: parsed.re_exports,
+                re_exports: resolved_re_exports,
             },
         );
     }
@@ -345,9 +360,9 @@ impl ModuleGraph {
                 }
 
                 for re_export in &module.re_exports {
-                    if let Some(resolved) = self.resolve_re_export_source(&path, &re_export.specifier) {
-                        if !reachable.contains(&resolved) {
-                            queue.push(resolved);
+                    if let Some(ref resolved) = re_export.resolved_path {
+                        if self.modules.contains_key(resolved) && !reachable.contains(resolved) {
+                            queue.push(resolved.clone());
                         }
                     }
                 }
@@ -357,18 +372,7 @@ impl ModuleGraph {
         reachable
     }
 
-    fn resolve_re_export_source(&self, from: &Path, specifier: &str) -> Option<PathBuf> {
-        for module in self.modules.values() {
-            if &module.path == from {
-                for import in &module.imports {
-                    if import.original.specifier == specifier {
-                        return import.resolved_path.clone();
-                    }
-                }
-            }
-        }
-        None
-    }
+
 
     pub fn get_used_exports(&self) -> HashMap<PathBuf, HashSet<String>> {
         let mut used: HashMap<PathBuf, HashSet<String>> = HashMap::new();
