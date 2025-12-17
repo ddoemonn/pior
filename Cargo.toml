@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Blazingly fast dead code detection for JS/TS projects"
 license = "MIT"
-repository = "https://github.com/pior-dev/pior"
+repository = "https://github.com/ddoemonn/pior"
 keywords = ["dead-code", "javascript", "typescript", "lint", "unused"]
 categories = ["development-tools", "command-line-utilities"]
 
